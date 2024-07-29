@@ -1,0 +1,23 @@
+.button {
+	flex: 1;
+	cursor: pointer;
+}
+
+.applyBtn {
+	background-color: rgb(231, 205, 126);
+	border: 1px solid rgb(151, 120, 28);
+
+	&:hover {
+		background-color: rgb(219, 180, 61);
+	}
+}
+
+.cancelBtn {
+	background-color: rgb(219, 61, 61);
+	border: 1px solid rgb(129, 24, 24);
+	color: white;
+
+	&:hover {
+		background-color: rgb(178, 34, 34);
+	}
+}
