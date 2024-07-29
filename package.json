@@ -1,7 +1,7 @@
 {
 	"name": "roscha-test",
 	"private": false,
-	"homepage": "https://ykinchin.github.io/roscha-test.io/",
+	"homepage": "https://ykinchin.github.io/roscha-test/",
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
