@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import { createColumns } from '../../utils/createColumns'
 import { createRows } from '../../utils/createRows'
 import Modal from '../modal/Modal'
@@ -11,14 +12,18 @@ const Table = () => {
 	const [modalMessage, setModalMessage] = useState('')
 
 	const [columns, setColumns] = useState<string[]>([])
-	const [rows, setRows] = useState<boolean[][]>([])
+	const [rows, setRows] = useState<{ id: string; data: boolean[] }[]>([])
 
 	const paintTable = async () => {
 		try {
 			const cols = await createColumns()
 			const rowsData = await createRows(cols.length)
+			const rowsWithIds = rowsData.map((row) => ({
+				id: uuidv4(),
+				data: row
+			}))
 			setColumns(cols)
-			setRows(rowsData)
+			setRows(rowsWithIds)
 		} catch (error) {
 			console.error('Error painting table:', error)
 		} finally {
@@ -35,27 +40,35 @@ const Table = () => {
 		setModalAction(() => () => {
 			setRows([
 				...rows,
-				Array.from({ length: columns.length }, () => Math.random() >= 0.5)
+				{
+					id: uuidv4(),
+					data: Array.from(
+						{ length: columns.length },
+						() => Math.random() >= 0.5
+					)
+				}
 			])
 			setIsModalOpen(false)
 		})
 		setIsModalOpen(true)
 	}
 
-	const handleDeleteRow = (index: number) => {
+	const handleDeleteRow = (id: string) => {
 		setModalMessage('Вы уверены, что хотите удалить строку?')
 		setModalAction(() => () => {
-			setRows(rows.filter((_, i) => i !== index))
+			setRows(rows.filter((row) => row.id !== id))
 			setIsModalOpen(false)
 		})
 		setIsModalOpen(true)
 	}
 
-	const handleChangeRow = (index: number) => {
+	const handleChangeRow = (id: string) => {
 		setModalMessage('Вы уверены, что хотите изменить строку?')
 		setModalAction(() => () => {
-			const newRow = rows.map((row, i) =>
-				i === index ? row.map(() => Math.random() > 0.5) : row
+			const newRow = rows.map((row) =>
+				row.id === id
+					? { ...row, data: row.data.map(() => Math.random() > 0.5) }
+					: row
 			)
 			setRows(newRow)
 			setIsModalOpen(false)
@@ -86,25 +99,25 @@ const Table = () => {
 					</thead>
 					<tbody>
 						{rows.map((row, rowIndex) => (
-							<tr key={rowIndex}>
+							<tr key={row.id}>
 								<td className='cell rowHeader'>
 									<span>Заказ {rowIndex + 1}</span>
 									<div className='buttonGroup'>
 										<button
 											className='button applyBtn'
-											onClick={() => handleChangeRow(rowIndex)}
+											onClick={() => handleChangeRow(row.id)}
 										>
 											Редактировать
 										</button>
 										<button
 											className='button cancelBtn'
-											onClick={() => handleDeleteRow(rowIndex)}
+											onClick={() => handleDeleteRow(row.id)}
 										>
 											Удалить
 										</button>
 									</div>
 								</td>
-								{row.map((highlight, cellIndex) => (
+								{row.data.map((highlight, cellIndex) => (
 									<td
 										key={cellIndex}
 										className={`cell ${highlight ? 'highlight' : ''}`}
